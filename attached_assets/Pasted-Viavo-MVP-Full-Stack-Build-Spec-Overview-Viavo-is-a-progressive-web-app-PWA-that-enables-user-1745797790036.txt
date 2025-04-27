@@ -1,0 +1,205 @@
+Viavo MVP — Full Stack Build Spec
+
+Overview:
+
+Viavo is a progressive web app (PWA) that enables users to send and receive ETH/USDC instantly via payment links,
+powered by invisible smart wallets tied to device biometrics (Passkeys).
+
+No seed phrases. No manual gas handling. No app store download needed.
+
+⸻
+
+Summary of What to Build
+Layer	Action
+Frontend (PWA App)	User creates invisible wallet via FaceID/Fingerprint, sends/receives payments via links
+Smart Wallet Contracts	Deploy minimal ERC-4337 smart wallet, owned by Passkey device signature
+Backend (Optional Light Services)	Generate and resolve payment links, relay transactions, send push notifications, optional referral tracking
+Relayer + Paymaster	Help users submit transactions without manually handling gas fees (use a sponsor at MVP)
+Notifications	Real-time push notifications for payment sent/received
+
+1. Frontend (PWA Web App)
+
+Stack:
+	•	React.js or Next.js (preferably Next.js for routing and performance)
+	•	TailwindCSS or very minimal styling
+	•	Wagmi + Viem for EVM interactions
+	•	WebAuthn API for Passkey integration
+	•	Web Push Notifications (via Firebase or VAPID keys)
+
+Features:
+	•	Landing Flow:
+	•	“Welcome to Viavo” → Tap “Continue”
+	•	Wallet Creation Flow:
+	•	“Secure your Wallet” → Tap “Set up with FaceID/Fingerprint”
+	•	Biometric confirmation via Passkey
+	•	Deploy smart wallet invisibly
+	•	Home Screen After Wallet Creation:
+	•	[ Create Payment Link ]
+	•	[ Receive Payment ]
+	•	Create Payment Link Flow:
+	•	Input amount (ETH/USDC toggle)
+	•	Optional memo
+	•	Optional expiration (default: 30 min)
+	•	“Generate Link” → Share link or QR code
+	•	Receive Payment Flow:
+	•	User shares a static “Receive Payment” link (auto-generates their address or payment page)
+	•	Payment Confirmation Flow (for receiver):
+	•	Receiver opens link
+	•	Sees amount + sender identity (if possible)
+	•	Confirm payment by biometric Passkey
+	•	Payment initiated
+	•	Referral Program (Optional for MVP if bandwidth allows):
+	•	Simple invite link generation after wallet creation
+
+PWA Requirements:
+	•	Installable on Home Screen (iOS Safari and Android Chrome)
+	•	App manifest.json configured (name, icons, short name)
+	•	Offline fallback page optional but preferred
+	•	No need for native App Store submission (at MVP)
+
+⸻
+
+2. Smart Wallet Contracts
+
+Stack:
+	•	Solidity 0.8+
+	•	Minimal ERC-4337 wallet template
+
+What to Deploy:
+	•	Smart Wallet Contract:
+	•	Deployed per user
+	•	Owner = their Passkey public key (or address derived from Passkey signature)
+	•	Functions:
+	•	executeTransaction(to, amount, data) → for sending ETH/USDC
+	•	validatePasskeySignature() → verify that biometric confirmation matches authorized owner
+	•	Gasless Setup:
+	•	Relayer (ERC-4337 bundler node)
+	•	Optional Paymaster contract to cover initial gas fees
+	•	Deploy first version only on Base chain
+
+⸻
+
+3. Backend (Optional Services — Serverless or Lightweight Node.js App)
+
+Stack:
+	•	Node.js + Express (or Next.js API routes)
+	•	Supabase or simple PostgreSQL (for temporary link/session storage)
+	•	WebSocket server (optional for push alerts if not using Firebase)
+
+Functions:
+	•	Payment Link Service:
+	•	Generate links encoding payment metadata (amount, receiver address, expiration time)
+	•	Validate and resolve links when opened
+	•	Relayer Service:
+	•	Accept UserOperation from frontend
+	•	Submit to Base network bundler
+	•	Paymaster Service (if not third-party):
+	•	Sponsor user’s first few transactions
+	•	Referral Tracking (Optional):
+	•	Store basic invite codes linked to wallet addresses
+	•	Trigger reward payout once invitee funds wallet
+	•	Push Notifications Service:
+	•	Trigger “Payment Incoming” notification immediately on payment initiation
+	•	Send “Payment Completed” after transaction confirmed on-chain
+
+4. Infrastructure Setup
+System	Requirement
+Smart Wallet Factory	Deploy one master Viavo Smart Wallet Contract
+PWA Hosting	Vercel / Netlify / AWS Amplify
+Relayer	Stackup node / Pimlico / or custom bundler
+Paymaster	Stackup Paymaster / or basic gas sponsor in-house
+Analytics (light)	Google Analytics or Plausible for monitoring drop-offs at each flow step
+Push Notification Infra	Firebase Cloud Messaging (FCM) for mobile PWA push alerts
+
+Summary
+
+⸻
+
+Viavo MVP Build Spec
+
+	•	Build an installable PWA where users can:
+	•	Create an invisible smart wallet tied to FaceID/Passkey
+	•	Create payment links to send ETH/USDC
+	•	Confirm payments with biometrics in one tap
+	•	Receive push notifications instantly upon payment initiation
+	•	Wallets are non-custodial ERC-4337 smart wallets
+	•	Backend lightly coordinates payment links and relays transactions (no custody)
+
+
+
+⸻
+
+Minimal Viavo Smart Wallet Structure (2025 MVP Ready)
+
+Design goal:
+	•	Handle deposit, payment, and rules inside the wallet itself.
+	•	Accept one biometric “yes” to authorize everything needed.
+
+⸻
+
+Core Architecture
+
+1. Ownership Layer
+	•	The wallet is a smart contract.
+	•	It has a primary owner: the user’s real wallet key OR their Passkey identity (via wallet auth server if you want optional recovery).
+	•	Ownership is abstracted to a Passkey signature (FaceID/Fingerprint triggers authorization).
+
+2. UserOperation Processor (ERC-4337 Light)
+	•	Instead of raw Ethereum transactions (EOAs), the wallet packages the payment request inside a UserOperation structure.
+	•	Viavo backend sponsors or bundles the operation if needed (optional for gas UX — can integrate paymaster if you want zero-gas at first).
+
+3. Escrow & Payment Slots
+	•	The wallet stores simple payment intents or escrow slots internally (amounts, recipients, unlock conditions).
+	•	When Passkey confirms, smart wallet executes release directly.
+
+⸻
+
+Smart Contract Core Structure Sketch (Solidity)
+
+pragma solidity ^0.8.20;
+
+contract ViavoSmartWallet {
+
+    address public owner; // Passkey signer (can be abstracted address or guardian module)
+
+    struct EscrowSlot {
+        address receiver;
+        uint256 amount;
+        uint256 releaseTime;
+        bool executed;
+    }
+
+    mapping(uint256 => EscrowSlot) public escrows;
+    uint256 public nextEscrowId;
+
+    event EscrowCreated(uint256 escrowId, address receiver, uint256 amount);
+    event PaymentExecuted(uint256 escrowId);
+
+    constructor(address _owner) {
+        owner = _owner;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not authorized");
+        _;
+    }
+
+    function createEscrow(address _receiver, uint256 _amount, uint256 _releaseTime) external onlyOwner {
+        escrows[nextEscrowId] = EscrowSlot(_receiver, _amount, _releaseTime, false);
+        emit EscrowCreated(nextEscrowId, _receiver, _amount);
+        nextEscrowId++;
+    }
+
+    function executePayment(uint256 escrowId) external onlyOwner {
+        EscrowSlot storage slot = escrows[escrowId];
+        require(!slot.executed, "Already executed");
+        require(block.timestamp >= slot.releaseTime, "Release time not reached");
+
+        slot.executed = true;
+        payable(slot.receiver).transfer(slot.amount);
+
+        emit PaymentExecuted(escrowId);
+    }
+
+    receive() external payable {} // Accept ETH
+}
