@@ -1,10 +1,10 @@
 import { createPublicClient, http, type Address, parseEther, formatEther } from 'viem';
 import { base } from 'viem/chains';
 
-// API Key for a bundler service (using Stackup in this example)
-const BUNDLER_API_KEY = import.meta.env.VITE_BUNDLER_API_KEY;
+// API Key for the StackUp bundler service
+const BUNDLER_API_KEY = import.meta.env.VITE_STACKUP_API_KEY;
 if (!BUNDLER_API_KEY) {
-  throw new Error('Bundler API key not found in environment variables');
+  console.warn('StackUp API key not found in client environment, will use server proxy');
 }
 
 // Initialize the client for Base chain

@@ -9,6 +9,104 @@ import { z } from "zod";
 export async function registerRoutes(app: Express): Promise<Server> {
   // Create HTTP server
   const httpServer = createServer(app);
+  
+  // Make sure we have the StackUp API key
+  const STACKUP_API_KEY = process.env.STACKUP_API_KEY;
+  if (!STACKUP_API_KEY) {
+    console.error("ERROR: STACKUP_API_KEY is missing in environment variables");
+  } else {
+    console.log("StackUp API key is configured and available for use");
+  }
+  
+  // StackUp API proxy endpoint for security (so API key doesn't need to be exposed to client)
+  app.post("/api/stackup/proxy", async (req, res) => {
+    try {
+      if (!STACKUP_API_KEY) {
+        return res.status(500).json({
+          success: false,
+          error: "StackUp API key not configured on server"
+        });
+      }
+      
+      const { method, params } = req.body;
+      
+      if (!method || !params) {
+        return res.status(400).json({
+          success: false,
+          error: "Missing required parameters: method, params"
+        });
+      }
+      
+      const bundlerUrl = 'https://api.stackup.sh/v1/node/base_sepolia';
+      const response = await fetch(bundlerUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${STACKUP_API_KEY}`
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method,
+          params
+        })
+      });
+      
+      const data = await response.json();
+      return res.json(data);
+    } catch (error) {
+      console.error("Error proxying StackUp API call:", error);
+      return res.status(500).json({
+        success: false,
+        error: "Error calling StackUp API"
+      });
+    }
+  });
+  
+  // Endpoint to get status of a userOp
+  app.get("/api/stackup/userop/:userOpHash", async (req, res) => {
+    try {
+      if (!STACKUP_API_KEY) {
+        return res.status(500).json({
+          success: false,
+          error: "StackUp API key not configured on server"
+        });
+      }
+      
+      const { userOpHash } = req.params;
+      
+      if (!userOpHash) {
+        return res.status(400).json({
+          success: false,
+          error: "Missing required parameter: userOpHash"
+        });
+      }
+      
+      const bundlerUrl = 'https://api.stackup.sh/v1/node/base_sepolia';
+      const response = await fetch(bundlerUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${STACKUP_API_KEY}`
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'eth_getUserOperationReceipt',
+          params: [userOpHash]
+        })
+      });
+      
+      const data = await response.json();
+      return res.json(data);
+    } catch (error) {
+      console.error("Error getting UserOp receipt:", error);
+      return res.status(500).json({
+        success: false,
+        error: "Error getting UserOp receipt"
+      });
+    }
+  });
 
   // API routes
   
