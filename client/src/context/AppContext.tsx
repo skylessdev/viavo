@@ -49,30 +49,44 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setModal(null);
   }, []);
 
-  // Wallet functions (simplified mocks for now)
+  // Wallet state
+  const [wallet, setWallet] = useState<{ smartWalletAddress: string } | null>(null);
+
+  // Wallet functions
   const checkIfWalletExists = useCallback(async () => {
     console.log('Checking if wallet exists...');
     setIsWalletLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      // For testing, we'll just say no wallet exists initially
-      setHasWallet(false);
-      setIsWalletLoading(false);
-    }, 500);
+    const savedWallet = localStorage.getItem('viavo_wallet');
+    if (savedWallet) {
+      const walletData = JSON.parse(savedWallet);
+      setWallet(walletData);
+      setHasWallet(true);
+      setWalletBalance('0.05'); // This would be fetched from the chain
+    }
+    setIsWalletLoading(false);
   }, []);
 
   const createWallet = useCallback(async () => {
     console.log('Creating wallet...');
     setIsWalletLoading(true);
     
-    // Simulate API call to create wallet
-    setTimeout(() => {
+    try {
+      // Create the wallet and get the transaction
+      const newWallet = {
+        smartWalletAddress: '0x9406Cc6185a346906296840746125a0E44976454' // This should come from your wallet.ts
+      };
+      
+      localStorage.setItem('viavo_wallet', JSON.stringify(newWallet));
+      setWallet(newWallet);
       setHasWallet(true);
       setWalletBalance('0.05');
-      setIsWalletLoading(false);
       navigateTo('biometricsConfirmation');
-    }, 1000);
+    } catch (err) {
+      console.error('Error creating wallet:', err);
+    } finally {
+      setIsWalletLoading(false);
+    }
   }, [navigateTo]);
 
   // Combine all values
