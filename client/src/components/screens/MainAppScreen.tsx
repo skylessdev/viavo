@@ -28,12 +28,27 @@ export default function MainAppScreen() {
         </h1>
         
         <div style={{
-          background: 'white',
-          padding: '0.5rem 1rem',
-          borderRadius: '9999px',
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.5rem',
+          alignItems: 'flex-end'
         }}>
-          <span style={{ fontWeight: 'bold', color: '#4F46E5' }}>{walletBalance} ETH</span>
+          <div style={{
+            background: 'white',
+            padding: '0.5rem 1rem',
+            borderRadius: '9999px',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+          }}>
+            <span style={{ fontWeight: 'bold', color: '#4F46E5' }}>{walletBalance} ETH</span>
+          </div>
+          <div style={{
+            background: 'rgba(79, 70, 229, 0.1)',
+            padding: '0.5rem 1rem',
+            borderRadius: '9999px',
+            fontSize: '0.875rem'
+          }}>
+            Wallet: {wallet?.smartWalletAddress.slice(0,6)}...{wallet?.smartWalletAddress.slice(-4)}
+          </div>
         </div>
       </header>
       
