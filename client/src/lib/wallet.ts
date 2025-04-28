@@ -47,7 +47,11 @@ export async function createWallet(): Promise<WalletData | null> {
     const ownerAddress = deriveAddressFromPasskey(passkey.id);
 
     // Create and sign deployment user operation
-    const initCode = "0x..."; // TODO: Add your wallet factory initialization code
+    // Smart Wallet Factory contract on Base Sepolia
+    const FACTORY_ADDRESS = "0x9406Cc6185a346906296840746125a0E44976454";
+    
+    // Initialize deployment code for new smart wallet
+    const initCode = FACTORY_ADDRESS + ownerAddress.slice(2);
     const deployOp = {
       sender: ownerAddress,
       nonce: 0,
