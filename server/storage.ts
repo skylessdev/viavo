@@ -17,6 +17,34 @@ interface Wallet {
   passkeyId: string;
 }
 
+// Payment-related types
+interface PaymentLink {
+  linkId: string;
+  amount: string;
+  currency: 'ETH' | 'USDC';
+  recipientAddress: string;
+  memo?: string;
+  expiresAt: Date | null;
+  claimed?: boolean;
+  claimedAt?: Date;
+  claimedBy?: string;
+}
+
+// Transaction-related types
+interface Transaction {
+  transactionId: string;
+  type: 'send' | 'receive';
+  fromAddress: string;
+  toAddress: string;
+  amount: string;
+  currency: 'ETH' | 'USDC';
+  memo?: string;
+  status: 'pending' | 'confirmed' | 'failed';
+  blockNumber?: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Interface for storage operations
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -27,6 +55,17 @@ export interface IStorage {
   createWallet(wallet: Wallet): Promise<Wallet>;
   getWalletBySmartAddress(smartWalletAddress: string): Promise<Wallet | null>;
   getWalletByPasskeyId(passkeyId: string): Promise<Wallet | null>;
+  
+  // Payment link methods
+  createPaymentLink(paymentLink: PaymentLink): Promise<PaymentLink>;
+  getPaymentLinkById(linkId: string): Promise<PaymentLink | null>;
+  updatePaymentLink(linkId: string, update: Partial<PaymentLink>): Promise<PaymentLink | null>;
+  
+  // Transaction methods
+  createTransaction(transaction: Omit<Transaction, 'createdAt' | 'updatedAt'>): Promise<Transaction>;
+  getTransactionById(transactionId: string): Promise<Transaction | null>;
+  updateTransaction(transactionId: string, update: Partial<Transaction>): Promise<Transaction | null>;
+  getTransactionsByAddress(address: string): Promise<Transaction[]>;
 }
 
 export class MemStorage implements IStorage {

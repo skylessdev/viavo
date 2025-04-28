@@ -22,33 +22,44 @@ export async function createWallet(passkeyCredential: any): Promise<{ address: s
     // Try to create an actual ERC-4337 smart contract wallet using StackUp
     let smartWalletAddress = null;
     try {
+      console.log('[WALLET] Attempting to deploy ERC-4337 smart wallet via StackUp bundler');
       smartWalletAddress = await deploySimpleAccountWallet(address);
+      
       if (smartWalletAddress) {
-        console.log(`Successfully deployed smart wallet at address: ${smartWalletAddress}`);
+        console.log(`[WALLET] Successfully deployed smart wallet at address: ${smartWalletAddress}`);
+        console.log(`[WALLET] View on block explorer: https://sepolia.basescan.org/address/${smartWalletAddress}`);
       }
-    } catch (deployError) {
-      console.error('Error deploying smart wallet:', deployError);
+    } catch (error) {
+      const deployError = error as Error;
+      console.error('[WALLET] Error deploying smart wallet:', deployError);
       
-      // FALLBACK: If we hit network issues in Replit, generate a mock address
-      // In production, we would handle this differently or retry
-      console.log('Using fallback wallet address generation due to network connectivity issues');
-      const smartWalletSeed = crypto.createHash('sha256').update(address).digest('hex');
-      smartWalletAddress = '0x' + smartWalletSeed.substring(0, 40);
-      
-      // Log the transaction that would have been created
-      console.log(`
-        SIMULATED TRANSACTION (Due to Replit network constraints)
-        ----------
-        Owner Address: ${address}
-        Smart Wallet Address: ${smartWalletAddress}
-        Network: Base Sepolia
-        Transaction: ERC-4337 Smart Wallet Deployment
-        StackUp API: Configured with key ${process.env.STACKUP_API_KEY ? 'available' : 'missing'}
+      if (process.env.NODE_ENV === 'production') {
+        // In production (Vercel), we want to fail if we can't connect to StackUp
+        // This will make the error visible in Vercel logs
+        console.error('[WALLET] Production environment: failing on StackUp connection error');
+        throw new Error(`Failed to connect to StackUp API: ${deployError.message || 'Unknown error'}`);
+      } else {
+        // FALLBACK: Only for development environments, generate a simulated address
+        console.log('[WALLET] Development environment: using fallback wallet address generation');
+        const smartWalletSeed = crypto.createHash('sha256').update(address).digest('hex');
+        smartWalletAddress = '0x' + smartWalletSeed.substring(0, 40);
         
-        In a production environment, this would send a real UserOperation to StackUp
-        and deploy a SimpleAccount wallet contract on Base Sepolia.
-        ----------
-      `);
+        // Log the transaction that would have been created
+        console.log(`
+          SIMULATED TRANSACTION (Development Mode Only)
+          ----------
+          Owner Address: ${address}
+          Smart Wallet Address: ${smartWalletAddress}
+          Network: Base Sepolia
+          Transaction: ERC-4337 Smart Wallet Deployment
+          StackUp API: Configured with key ${process.env.STACKUP_API_KEY ? 'available' : 'missing'}
+          Environment: ${process.env.NODE_ENV || 'development'}
+          
+          In production, this will send a real UserOperation to StackUp
+          and deploy a SimpleAccount wallet contract on Base Sepolia.
+          ----------
+        `);
+      }
     }
     
     // Make sure we have a valid wallet address before storing

@@ -106,12 +106,17 @@ export async function processPayment(params: {
       passkeySignature 
     } = params;
     
+    console.log(`[PAYMENT] Processing payment: ${amount} ${currency} from ${fromAddress} to ${toAddress}`);
+    
     // Get the wallet for verification
     const wallet = await getWallet(fromAddress);
     
     if (!wallet) {
+      console.error(`[PAYMENT] Wallet not found: ${fromAddress}`);
       throw new Error('Wallet not found');
     }
+    
+    console.log(`[PAYMENT] Wallet found, verifying passkey signature`);
     
     // Verify passkey signature
     const isValid = await verifyPasskeySignature(
@@ -121,11 +126,15 @@ export async function processPayment(params: {
     );
     
     if (!isValid) {
+      console.error(`[PAYMENT] Invalid passkey signature for wallet: ${fromAddress}`);
       throw new Error('Invalid passkey signature');
     }
     
+    console.log(`[PAYMENT] Passkey signature verified successfully`);
+    
     // Update payment link if provided
     if (linkId) {
+      console.log(`[PAYMENT] Payment link ID provided: ${linkId}, updating status`);
       const paymentLink = await storage.getPaymentLinkById(linkId);
       
       if (paymentLink) {
@@ -134,11 +143,15 @@ export async function processPayment(params: {
           claimedAt: new Date(),
           claimedBy: fromAddress
         });
+        console.log(`[PAYMENT] Payment link updated as claimed`);
+      } else {
+        console.log(`[PAYMENT] Payment link not found: ${linkId}`);
       }
     }
     
     // Generate transaction ID
     const transactionId = crypto.randomBytes(32).toString('hex');
+    console.log(`[PAYMENT] Generated transaction ID: ${transactionId}`);
     
     // Create transaction record
     await storage.createTransaction({
@@ -152,8 +165,28 @@ export async function processPayment(params: {
       status: 'pending'
     });
     
-    // In a real implementation, this would submit the transaction to the blockchain
-    // For MVP, we'll just return a success response
+    // In production, this would submit the transaction to the blockchain via StackUp
+    if (process.env.NODE_ENV === 'production') {
+      console.log(`[PAYMENT] Production environment: would submit real transaction to blockchain`);
+      console.log(`[PAYMENT] Transaction would be visible at: https://sepolia.basescan.org/tx/${transactionId}`);
+      
+      // Here we would use the StackUp API to submit a transaction
+      // This will be implemented when deployed to Vercel
+    } else {
+      console.log(`[PAYMENT] Development environment: simulating blockchain transaction`);
+      
+      console.log(`
+        SIMULATED TRANSACTION (Development Mode Only)
+        ----------
+        From: ${fromAddress}
+        To: ${toAddress}
+        Amount: ${amount} ${currency}
+        Memo: ${memo || 'N/A'}
+        Transaction ID: ${transactionId}
+        Environment: ${process.env.NODE_ENV || 'development'}
+        ----------
+      `);
+    }
     
     // Update transaction status after a delay to simulate confirmation
     setTimeout(async () => {
@@ -161,7 +194,10 @@ export async function processPayment(params: {
         status: 'confirmed',
         blockNumber: Math.floor(Math.random() * 1000000) + 1000000
       });
+      console.log(`[PAYMENT] Transaction ${transactionId} confirmed`);
     }, 5000);
+    
+    console.log(`[PAYMENT] Payment processing complete, returning pending status`);
     
     return {
       transactionId,
