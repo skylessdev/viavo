@@ -126,14 +126,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { passkeyCredential } = req.body;
+      
+      console.log("Creating wallet for passkey ID:", passkeyCredential.id);
+      
       const wallet = await createWallet(passkeyCredential);
 
       if (!wallet) {
+        console.error("Wallet creation failed - null result returned from createWallet function");
         return res.status(500).json({ 
           success: false, 
           error: "Failed to create wallet" 
         });
       }
+      
+      console.log("Wallet created successfully on server side:", wallet.smartWalletAddress);
 
       return res.status(201).json({ 
         success: true, 
@@ -143,7 +149,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error creating wallet:", error);
       return res.status(500).json({ 
         success: false, 
-        error: "Internal server error" 
+        error: error instanceof Error ? error.message : "Internal server error" 
       });
     }
   });
