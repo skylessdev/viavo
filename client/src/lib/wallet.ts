@@ -54,16 +54,19 @@ export async function createWallet(): Promise<WalletData | null> {
     const initCode = FACTORY_ADDRESS + ownerAddress.slice(2);
     const deployOp = {
       sender: ownerAddress,
-      nonce: 0,
+      nonce: "0x0",
       initCode,
       callData: "0x",
-      callGasLimit: 100000,
-      verificationGasLimit: 150000,
-      preVerificationGas: 50000,
-      maxFeePerGas: 1000000000,
-      maxPriorityFeePerGas: 100000000,
+      callGasLimit: "0x186A0", // 100000
+      verificationGasLimit: "0x249F0", // 150000
+      preVerificationGas: "0xC350", // 50000
+      maxFeePerGas: "0x3B9ACA00", // 1000000000
+      maxPriorityFeePerGas: "0x5F5E100", // 100000000
+      paymasterAndData: "0x",
       signature: "0x"
     };
+
+    console.log("Submitting deployment operation:", deployOp);
 
     // Submit deployment transaction
     const userOpHash = await submitUserOp(deployOp);
