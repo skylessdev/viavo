@@ -10,7 +10,7 @@ if (!BUNDLER_API_KEY) {
 // Initialize the client for Base chain
 export const publicClient = createPublicClient({
   chain: base,
-  transport: http()
+  transport: http('https://sepolia.base.org')
 });
 
 /**
@@ -119,20 +119,29 @@ export async function createSignedUserOp(
  * @param userOpHash The userOp hash
  * @returns Promise resolving to the transaction hash if successful
  */
-export async function submitUserOp(userOpHash: string): Promise<string | null> {
+export async function submitUserOp(userOp: any): Promise<string | null> {
   try {
-    // In a real implementation, this would submit the user operation to a bundler
-    // For the MVP, we're simulating this with a mock transaction hash
-    
-    // Simulate the submission delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Mock transaction hash
-    const txHash = '0x' + Array(64).fill(0).map(() => 
-      Math.floor(Math.random() * 16).toString(16)
-    ).join('');
-    
-    return txHash;
+    const bundlerUrl = 'https://api.stackup.sh/v1/node/base_sepolia';
+    const response = await fetch(bundlerUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${BUNDLER_API_KEY}`
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'eth_sendUserOperation',
+        params: [userOp]
+      })
+    });
+
+    const data = await response.json();
+    if (data.error) {
+      throw new Error(data.error.message);
+    }
+
+    return data.result;
   } catch (error) {
     console.error('Error submitting user operation:', error);
     return null;
