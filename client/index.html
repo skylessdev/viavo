@@ -3,22 +3,58 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <meta name="theme-color" content="#3B82F6" />
-    <meta name="description" content="Viavo - Instant crypto payments with just one tap. No seed phrases. No gas handling." />
-    <title>Viavo | Instant Crypto Payments</title>
+    <title>Viavo Debug Test</title>
     
-    <!-- PWA related meta tags and links -->
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="apple-touch-icon" href="/viavo-icon-192.png" />
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: system-ui, sans-serif;
+        background-color: #f5f5f5;
+      }
+      #debug {
+        padding: 20px;
+        margin: 20px;
+        background-color: #f0f0f0;
+        border: 2px solid #666;
+        border-radius: 8px;
+      }
+      .error {
+        color: red;
+        font-weight: bold;
+      }
+    </style>
   </head>
   <body>
+    <!-- Static content for debugging -->
+    <div id="debug">
+      <h2>Debug Panel</h2>
+      <p>If you can see this, HTML is working correctly.</p>
+      <p id="debug-message">Waiting for React to initialize...</p>
+    </div>
+    
+    <!-- React will mount here -->
     <div id="root"></div>
+    
+    <!-- Debug script -->
+    <script>
+      // Check if the DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('debug-message').textContent = 'DOM loaded. Waiting for React...';
+      });
+      
+      // Monitor for React errors
+      window.addEventListener('error', function(event) {
+        console.error('Global error:', event.error);
+        const debugMsg = document.getElementById('debug-message');
+        if (debugMsg) {
+          debugMsg.className = 'error';
+          debugMsg.textContent = 'Error: ' + (event.error ? event.error.message : 'Unknown error');
+        }
+      });
+    </script>
+    
+    <!-- React entry point -->
     <script type="module" src="/src/main.tsx"></script>
-    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
-    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
   </body>
 </html>
