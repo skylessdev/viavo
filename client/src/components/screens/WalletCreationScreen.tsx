@@ -1,49 +1,92 @@
+import React, { useState } from 'react';
 import { useAppContext } from '@/context/AppContext';
-import { Button } from '@/components/ui/button';
-import Icon from '@/components/ui/icon';
 
 export default function WalletCreationScreen() {
-  const { createUserWallet } = useAppContext();
+  const { createWallet, isWalletLoading } = useAppContext();
+  const [isCheckingCompatibility, setIsCheckingCompatibility] = useState(false);
   
-  const handleSetupBiometrics = () => {
-    createUserWallet();
+  const handleCreateWallet = async () => {
+    setIsCheckingCompatibility(true);
+    
+    // Simulate checking device compatibility
+    setTimeout(() => {
+      setIsCheckingCompatibility(false);
+      createWallet();
+    }, 1000);
   };
   
   return (
-    <div className="fixed inset-0 z-40 bg-white p-6">
-      <div className="w-full max-w-xs mx-auto flex flex-col items-center text-center space-y-6 pt-12">
-        <div className="relative w-20 h-20 mb-4 flex items-center justify-center rounded-full bg-primary-100 pulse-ring">
-          <Icon name="fingerprint" className="text-primary-600 text-4xl" />
-        </div>
+    <div style={{
+      padding: '2rem',
+      maxWidth: '800px',
+      margin: '0 auto',
+      fontFamily: 'system-ui, sans-serif',
+      textAlign: 'center',
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh',
+      justifyContent: 'center'
+    }}>
+      <div style={{ marginBottom: '2rem' }}>
+        <h1 style={{ 
+          fontSize: '2.5rem', 
+          color: '#4F46E5',
+          marginBottom: '1rem'
+        }}>
+          Secure Your Wallet
+        </h1>
         
-        <h1 className="text-2xl font-bold text-neutral-900">Secure Your Wallet</h1>
-        
-        <p className="text-neutral-600 mb-4">
-          Use your device biometrics to create an invisible wallet. No seed phrases to remember.
-        </p>
-        
-        <div className="bg-neutral-50 rounded-lg p-4 border border-neutral-200 w-full">
-          <div className="flex items-center mb-2">
-            <Icon name="security" className="text-primary-600 mr-2" />
-            <span className="font-medium">Your crypto, your control</span>
-          </div>
-          <p className="text-sm text-neutral-600 text-left">
-            Your wallet is non-custodial and secured by your device's biometrics.
-          </p>
-        </div>
-        
-        <Button 
-          className="w-full mt-6 py-6 text-base flex items-center justify-center"
-          onClick={handleSetupBiometrics}
-        >
-          <Icon name="face" className="mr-2" />
-          Set up with FaceID/Fingerprint
-        </Button>
-        
-        <p className="text-xs text-neutral-500 mt-4">
-          By continuing, you agree to our <a href="#" className="text-primary-600">Terms</a> and <a href="#" className="text-primary-600">Privacy Policy</a>
+        <p style={{ fontSize: '1.25rem', color: '#4B5563', marginBottom: '2rem' }}>
+          Create a wallet secured by your device's biometrics
         </p>
       </div>
+      
+      <div style={{
+        background: 'white',
+        padding: '2rem',
+        borderRadius: '0.75rem',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        marginBottom: '2rem'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '96px',
+          height: '96px',
+          margin: '0 auto 1.5rem',
+          borderRadius: '50%',
+          background: 'rgba(79, 70, 229, 0.1)',
+          color: '#4F46E5',
+          fontSize: '2rem'
+        }}>
+          👆
+        </div>
+        
+        <h2 style={{ color: '#4F46E5', marginTop: 0 }}>Setup with FaceID or Fingerprint</h2>
+        <p>Your crypto wallet will be secured by your device's biometrics.</p>
+        <p>No seed phrases needed - just use your face or fingerprint to access your wallet.</p>
+      </div>
+      
+      <button 
+        onClick={handleCreateWallet}
+        disabled={isWalletLoading || isCheckingCompatibility}
+        style={{
+          background: isWalletLoading || isCheckingCompatibility ? '#CBD5E1' : 'linear-gradient(to right, #4F46E5, #7C3AED)',
+          color: isWalletLoading || isCheckingCompatibility ? '#64748B' : 'white',
+          border: 'none',
+          padding: '1rem 2rem',
+          borderRadius: '0.5rem',
+          fontSize: '1.125rem',
+          fontWeight: 'bold',
+          cursor: isWalletLoading || isCheckingCompatibility ? 'not-allowed' : 'pointer',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+        }}
+      >
+        {isCheckingCompatibility ? 'Checking Device Compatibility...' : 
+         isWalletLoading ? 'Creating Wallet...' : 
+         'Create Wallet with Biometrics'}
+      </button>
     </div>
   );
 }

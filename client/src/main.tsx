@@ -1,18 +1,23 @@
 import { createRoot } from "react-dom/client";
-import MinimalApp from "./MinimalApp"; // Import the minimal App with working Context
+import MinimalApp from "./MinimalApp"; // Keep for fallback reference
+import ViavoMVP from "./ViavoMVP"; // Import our new MVP app
+import './index.css';
 
 // Find the root element
 const rootElement = document.getElementById("root");
 
-console.log("Starting Minimal Viavo App...");
+console.log("Starting Viavo App...");
 
 if (rootElement) {
-  console.log("Root element found, attempting to render Minimal Viavo app...");
+  console.log("Root element found, attempting to render Viavo app...");
   try {
     const root = createRoot(rootElement);
-    root.render(<MinimalApp />);
-    console.log("Minimal Viavo app rendered successfully");
-  } catch (error) {
+    
+    // Use our new ViavoMVP component instead of the minimal one
+    root.render(<ViavoMVP />);
+    
+    console.log("Viavo app rendered successfully");
+  } catch (error: any) { // Explicitly type as 'any' to avoid TS errors
     console.error("Error rendering app:", error);
     // Show error directly in the DOM for easier debugging
     rootElement.innerHTML = `
