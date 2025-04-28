@@ -73,7 +73,19 @@ export async function createWallet(): Promise<WalletData | null> {
 
     console.log("Deployment transaction:", `https://sepolia.basescan.org/tx/${userOpHash}`);
 
-    const smartWalletAddress = "0x"+userOpHash.slice(2,66); //This is a placeholder, needs proper retrieval
+    // Compute counterfactual address for ERC-4337 wallet
+    const initCodeHash = ethers.keccak256(initCode);
+    const smartWalletAddress = ethers.getCreate2Address(
+      FACTORY_ADDRESS,
+      ethers.keccak256(ownerAddress),
+      initCodeHash
+    );
+    
+    console.log('Deployed wallet:', {
+      ownerAddress,
+      smartWalletAddress,
+      txHash: userOpHash
+    });
 
     // Save wallet and passkey info to localStorage
     const walletData: WalletData = {

@@ -144,7 +144,9 @@ export async function submitUserOp(userOp: any): Promise<string | null> {
 
     // Wait for user operation to be included
     const userOpHash = data.result;
+    console.log('UserOp submitted:', userOpHash);
     const receipt = await waitForUserOpReceipt(userOpHash);
+    console.log('Transaction confirmed:', receipt?.transactionHash);
     return receipt?.transactionHash || null;
   } catch (error) {
     console.error('Error submitting user operation:', error);
