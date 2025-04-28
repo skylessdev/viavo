@@ -2,7 +2,10 @@ import { createPublicClient, http, type Address, parseEther, formatEther } from 
 import { base } from 'viem/chains';
 
 // API Key for a bundler service (using Stackup in this example)
-const BUNDLER_API_KEY = import.meta.env.VITE_BUNDLER_API_KEY || '';
+const BUNDLER_API_KEY = import.meta.env.VITE_BUNDLER_API_KEY;
+if (!BUNDLER_API_KEY) {
+  throw new Error('Bundler API key not found in environment variables');
+}
 
 // Initialize the client for Base chain
 export const publicClient = createPublicClient({
