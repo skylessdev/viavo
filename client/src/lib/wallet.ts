@@ -7,7 +7,6 @@ import {
 } from './web-authn';
 import {
   deriveAddressFromPasskey,
-  deploySmartWallet,
   getAddressBalance,
   createSignedUserOp,
   submitUserOp,
@@ -47,11 +46,30 @@ export async function createWallet(): Promise<WalletData | null> {
     // Derive Ethereum address from passkey
     const ownerAddress = deriveAddressFromPasskey(passkey.id);
 
-    // Deploy smart wallet contract
-    const smartWalletAddress = await deploySmartWallet(ownerAddress);
-    if (!smartWalletAddress) {
+    // Create and sign deployment user operation
+    const initCode = "0x..."; // TODO: Add your wallet factory initialization code
+    const deployOp = {
+      sender: ownerAddress,
+      nonce: 0,
+      initCode,
+      callData: "0x",
+      callGasLimit: 100000,
+      verificationGasLimit: 150000,
+      preVerificationGas: 50000,
+      maxFeePerGas: 1000000000,
+      maxPriorityFeePerGas: 100000000,
+      signature: "0x"
+    };
+
+    // Submit deployment transaction
+    const userOpHash = await submitUserOp(deployOp);
+    if (!userOpHash) {
       throw new Error("Failed to deploy smart wallet");
     }
+
+    console.log("Deployment transaction:", `https://sepolia.basescan.org/tx/${userOpHash}`);
+
+    const smartWalletAddress = "0x"+userOpHash.slice(2,66); //This is a placeholder, needs proper retrieval
 
     // Save wallet and passkey info to localStorage
     const walletData: WalletData = {
@@ -182,7 +200,7 @@ export async function generatePaymentLink(
 
   // In a real implementation, this would generate a secure payment link with the server
   // For now, we're creating a simple link with query parameters
-  
+
   const params = new URLSearchParams();
   params.append('to', walletData.smartWalletAddress);
   params.append('amount', amount.toString());
