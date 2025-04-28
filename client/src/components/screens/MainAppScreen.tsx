@@ -2,7 +2,7 @@ import React from 'react';
 import { useAppContext } from '@/context/AppContext';
 
 export default function MainAppScreen() {
-  const { showModal, walletBalance } = useAppContext();
+  const { showModal, walletBalance, wallet } = useAppContext();
   
   return (
     <div style={{

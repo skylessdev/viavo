@@ -17,6 +17,7 @@ interface AppContextInterface {
   hasWallet: boolean;
   walletBalance: string;
   isWalletLoading: boolean;
+  wallet: { smartWalletAddress: string } | null;
   
   // Basic wallet functions
   checkIfWalletExists: () => Promise<void>;
