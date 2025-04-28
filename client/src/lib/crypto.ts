@@ -132,18 +132,50 @@ export async function submitUserOp(userOp: any): Promise<string | null> {
         jsonrpc: '2.0',
         id: 1,
         method: 'eth_sendUserOperation',
-        params: [userOp]
+        params: [userOp, "0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789"] // EntryPoint contract address
       })
     });
 
     const data = await response.json();
     if (data.error) {
+      console.error('Bundler error:', data.error);
       throw new Error(data.error.message);
     }
 
-    return data.result;
+    // Wait for user operation to be included
+    const userOpHash = data.result;
+    const receipt = await waitForUserOpReceipt(userOpHash);
+    return receipt?.transactionHash || null;
   } catch (error) {
     console.error('Error submitting user operation:', error);
     return null;
   }
+}
+async function waitForUserOpReceipt(userOpHash: string, maxAttempts = 10): Promise<any> {
+  const bundlerUrl = 'https://api.stackup.sh/v1/node/base_sepolia';
+  
+  for (let i = 0; i < maxAttempts; i++) {
+    const response = await fetch(bundlerUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${BUNDLER_API_KEY}`
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'eth_getUserOperationReceipt',
+        params: [userOpHash]
+      })
+    });
+
+    const data = await response.json();
+    if (data.result) {
+      return data.result;
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds between attempts
+  }
+  
+  throw new Error('User operation receipt not found after maximum attempts');
 }
