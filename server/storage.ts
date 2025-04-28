@@ -1,4 +1,14 @@
-import { users, type User, type InsertUser } from "@shared/schema";
+// Define user types as needed
+export interface User {
+  id: number;
+  username: string;
+  [key: string]: any;
+}
+
+export interface InsertUser {
+  username: string;
+  [key: string]: any;
+}
 
 // Wallet-related types
 interface Wallet {

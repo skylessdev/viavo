@@ -72,10 +72,39 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setIsWalletLoading(true);
     
     try {
-      // Create the wallet and get the transaction
-      const newWallet = {
-        smartWalletAddress: '0x9406Cc6185a346906296840746125a0E44976454' // This should come from your wallet.ts
+      // Generate mock passkey credential (in real app, this would come from WebAuthn)
+      const mockPasskey = {
+        id: `viavo-passkey-${Date.now()}`,
+        type: 'public-key'
       };
+      
+      // Call our API to create the wallet
+      const response = await fetch('/api/wallet', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          passkeyCredential: mockPasskey
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to create wallet: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Unknown error creating wallet');
+      }
+      
+      // Get the wallet data from the response
+      const newWallet = {
+        smartWalletAddress: data.data.smartWalletAddress
+      };
+      
+      console.log('Wallet created successfully:', newWallet);
       
       localStorage.setItem('viavo_wallet', JSON.stringify(newWallet));
       setWallet(newWallet);
