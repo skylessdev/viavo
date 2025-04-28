@@ -99,6 +99,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     hasWallet,
     walletBalance,
     isWalletLoading,
+    wallet,
     checkIfWalletExists,
     createWallet
   };

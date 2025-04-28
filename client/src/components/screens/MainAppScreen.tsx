@@ -41,14 +41,16 @@ export default function MainAppScreen() {
           }}>
             <span style={{ fontWeight: 'bold', color: '#4F46E5' }}>{walletBalance} ETH</span>
           </div>
-          <div style={{
-            background: 'rgba(79, 70, 229, 0.1)',
-            padding: '0.5rem 1rem',
-            borderRadius: '9999px',
-            fontSize: '0.875rem'
-          }}>
-            Wallet: {wallet?.smartWalletAddress.slice(0,6)}...{wallet?.smartWalletAddress.slice(-4)}
-          </div>
+          {wallet && (
+            <div style={{
+              background: 'rgba(79, 70, 229, 0.1)',
+              padding: '0.5rem 1rem',
+              borderRadius: '9999px',
+              fontSize: '0.875rem'
+            }}>
+              Wallet: {wallet.smartWalletAddress.slice(0,6)}...{wallet.smartWalletAddress.slice(-4)}
+            </div>
+          )}
         </div>
       </header>
       
