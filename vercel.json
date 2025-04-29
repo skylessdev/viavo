@@ -20,9 +20,17 @@
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "X-Requested-With, Content-Type, Accept"
+          "value": "X-Requested-With, Content-Type, Accept, Authorization"
         }
       ]
     }
+  ],
+  "rewrites": [
+    { "source": "/api/wallet", "destination": "/api/wallet.js" },
+    { "source": "/api/wallet-balance", "destination": "/api/wallet-balance.js" },
+    { "source": "/api/payment-link", "destination": "/api/payment-link.js" },
+    { "source": "/api/payment", "destination": "/api/payment.js" },
+    { "source": "/api/transactions", "destination": "/api/transactions.js" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
