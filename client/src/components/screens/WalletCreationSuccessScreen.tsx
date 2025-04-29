@@ -1,99 +1,81 @@
-import React from 'react';
-import { useAppContext } from '@/context/AppContext';
+import React, { useEffect } from 'react';
+import { useAppContext } from '../../context/AppContext';
+import { Button } from '../../components/ui/button';
+import { formatAddress } from '../../lib/utils';
 
-export default function WalletCreationSuccessScreen() {
-  const { navigateTo, walletBalance } = useAppContext();
-  
+const WalletCreationSuccessScreen: React.FC = () => {
+  const { navigateTo, wallet } = useAppContext();
+
+  // Automatically navigate to main app after a delay
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigateTo('mainApp');
+    }, 5000);
+    
+    return () => clearTimeout(timer);
+  }, [navigateTo]);
+
   return (
-    <div style={{
-      padding: '2rem',
-      maxWidth: '800px',
-      margin: '0 auto',
-      fontFamily: 'system-ui, sans-serif',
-      textAlign: 'center',
-      display: 'flex',
-      flexDirection: 'column',
-      minHeight: '100vh',
-      justifyContent: 'center'
-    }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '80px',
-          height: '80px',
-          margin: '0 auto 1.5rem',
-          borderRadius: '50%',
-          background: '#10B981',
-          color: 'white',
-          fontSize: '2.5rem'
-        }}>
-          ✓
-        </div>
-        
-        <h1 style={{ 
-          fontSize: '2.5rem', 
-          color: '#10B981',
-          marginBottom: '1rem'
-        }}>
-          Wallet Created!
-        </h1>
-        
-        <p style={{ fontSize: '1.25rem', color: '#4B5563', marginBottom: '2rem' }}>
-          Your wallet is ready to use
-        </p>
-      </div>
-      
-      <div style={{
-        background: 'white',
-        padding: '2rem',
-        borderRadius: '0.75rem',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-        marginBottom: '2rem'
-      }}>
-        <h2 style={{ color: '#4F46E5', marginTop: 0 }}>Wallet Details</h2>
-        
-        <div style={{
-          background: 'rgba(79, 70, 229, 0.1)',
-          padding: '1.5rem',
-          borderRadius: '0.5rem',
-          marginTop: '1rem'
-        }}>
-          <p style={{ margin: '0 0 0.5rem', color: '#6B7280' }}>
-            Current Balance
-          </p>
-          <p style={{ 
-            margin: 0, 
-            fontSize: '2rem', 
-            fontWeight: 'bold', 
-            color: '#4F46E5'
-          }}>
-            {walletBalance} ETH
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-12 bg-gradient-to-b from-blue-50 to-white">
+      <div className="w-full max-w-md space-y-8 text-center">
+        <div className="space-y-2">
+          <div className="flex items-center justify-center mb-6">
+            <div className="p-4 rounded-full bg-green-100">
+              <svg className="w-16 h-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          </div>
+          
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+            Wallet Created!
+          </h1>
+          <p className="text-gray-600">
+            Your secure crypto wallet is ready to use
           </p>
         </div>
-        
-        <p style={{ marginTop: '1.5rem', color: '#4B5563' }}>
-          Your wallet is secured by your device's biometrics. You can now send and receive crypto instantly.
-        </p>
+
+        <div className="py-6">
+          <div className="p-6 bg-white rounded-xl shadow-lg">
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <h2 className="text-xl font-semibold text-gray-800">
+                  Wallet Details
+                </h2>
+                
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <p className="font-mono text-sm break-all">
+                    {wallet?.smartWalletAddress ? 
+                      formatAddress(wallet.smartWalletAddress, 8) : 
+                      'Wallet address loading...'}
+                  </p>
+                </div>
+                
+                <p className="mt-4 text-gray-600">
+                  Your wallet is secured with biometric authentication and ready to receive funds.
+                </p>
+              </div>
+
+              <div className="p-4 text-left bg-blue-50 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  <strong>Tip:</strong> You'll be automatically redirected to the main app in a few seconds.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <Button 
+            onClick={() => navigateTo('mainApp')}
+            className="w-full py-6 text-lg font-semibold bg-blue-600 hover:bg-blue-700"
+          >
+            Continue to Wallet
+          </Button>
+        </div>
       </div>
-      
-      <button 
-        onClick={() => navigateTo('mainApp')}
-        style={{
-          background: 'linear-gradient(to right, #4F46E5, #7C3AED)',
-          color: 'white',
-          border: 'none',
-          padding: '1rem 2rem',
-          borderRadius: '0.5rem',
-          fontSize: '1.125rem',
-          fontWeight: 'bold',
-          cursor: 'pointer',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-        }}
-      >
-        Go to Wallet
-      </button>
     </div>
   );
-}
+};
+
+export default WalletCreationSuccessScreen;

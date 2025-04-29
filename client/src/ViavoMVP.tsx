@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 import { AppProvider, useAppContext } from './context/AppContext';
-import WelcomeScreen from '@/components/screens/WelcomeScreen';
-import WalletCreationScreen from '@/components/screens/WalletCreationScreen';
-import BiometricsConfirmationScreen from '@/components/screens/BiometricsConfirmationScreen';
-import WalletCreationSuccessScreen from '@/components/screens/WalletCreationSuccessScreen';
-import MainAppScreen from '@/components/screens/MainAppScreen';
+import WelcomeScreen from './components/screens/WelcomeScreen';
+import WalletCreationScreen from './components/screens/WalletCreationScreen';
+import BiometricsConfirmationScreen from './components/screens/BiometricsConfirmationScreen';
+import WalletCreationSuccessScreen from './components/screens/WalletCreationSuccessScreen';
+import MainAppScreen from './components/screens/MainAppScreen';
 
 // Using this component to wrap the actual app content
 // This ensures that we separate the AppProvider from the components using the context

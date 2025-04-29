@@ -1,10 +1,11 @@
-import React, { createContext, useContext, ReactNode, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { Address } from 'viem';
 
-// Basic screen and modal types
+// Define screen and modal types
 type ScreenType = 'welcome' | 'walletCreation' | 'biometricsConfirmation' | 'walletCreationSuccess' | 'mainApp';
 type ModalType = 'createPaymentLink' | 'paymentLinkGenerated' | 'receivePayment' | 'paymentConfirmation' | 'paymentSuccess' | null;
 
-// Define a minimal version of the context interface
+// Define the context interface
 interface AppContextInterface {
   // Navigation state
   screen: ScreenType;
@@ -13,7 +14,7 @@ interface AppContextInterface {
   showModal: (modal: ModalType) => void;
   hideModal: () => void;
   
-  // Wallet state (simplified for now)
+  // Wallet state
   hasWallet: boolean;
   walletBalance: string;
   isWalletLoading: boolean;
@@ -21,132 +22,127 @@ interface AppContextInterface {
   
   // Basic wallet functions
   checkIfWalletExists: () => Promise<void>;
-  createWallet: () => Promise<void>;
+  createWallet: () => Promise<any>;
 }
 
-// Create context with default values
-const AppContext = createContext<AppContextInterface | undefined>(undefined);
+// Create the context with default values
+const AppContext = createContext<AppContextInterface>({
+  screen: 'welcome',
+  modal: null,
+  navigateTo: () => {},
+  showModal: () => {},
+  hideModal: () => {},
+  
+  hasWallet: false,
+  walletBalance: '0',
+  isWalletLoading: false,
+  wallet: null,
+  
+  checkIfWalletExists: async () => {},
+  createWallet: async () => {},
+});
 
-// Create a provider component
+// Provider component that wraps the app and makes context available
 export function AppProvider({ children }: { children: ReactNode }) {
-  // State
+  // Navigation state
   const [screen, setScreen] = useState<ScreenType>('welcome');
   const [modal, setModal] = useState<ModalType>(null);
-  const [hasWallet, setHasWallet] = useState<boolean>(false);
-  const [walletBalance, setWalletBalance] = useState<string>('0.00');
-  const [isWalletLoading, setIsWalletLoading] = useState<boolean>(false);
-
+  
+  // Wallet state
+  const [hasWallet, setHasWallet] = useState(false);
+  const [walletBalance, setWalletBalance] = useState('0');
+  const [isWalletLoading, setIsWalletLoading] = useState(false);
+  const [wallet, setWallet] = useState<{ smartWalletAddress: string } | null>(null);
+  
   // Navigation functions
   const navigateTo = useCallback((newScreen: ScreenType) => {
     setScreen(newScreen);
   }, []);
-
+  
   const showModal = useCallback((newModal: ModalType) => {
     setModal(newModal);
   }, []);
-
+  
   const hideModal = useCallback(() => {
     setModal(null);
   }, []);
-
-  // Wallet state
-  const [wallet, setWallet] = useState<{ smartWalletAddress: string } | null>(null);
-
+  
   // Wallet functions
   const checkIfWalletExists = useCallback(async () => {
-    console.log('Checking if wallet exists...');
-    setIsWalletLoading(true);
-    
-    const savedWallet = localStorage.getItem('viavo_wallet');
-    if (savedWallet) {
-      const walletData = JSON.parse(savedWallet);
-      setWallet(walletData);
-      setHasWallet(true);
-      setWalletBalance('0.05'); // This would be fetched from the chain
-    }
-    setIsWalletLoading(false);
-  }, []);
-
-  const createWallet = useCallback(async () => {
-    console.log('Creating wallet...');
-    setIsWalletLoading(true);
-    
     try {
-      // Generate mock passkey credential (in real app, this would come from WebAuthn)
-      const mockPasskey = {
-        id: `viavo-passkey-${Date.now()}`,
-        type: 'public-key'
-      };
+      setIsWalletLoading(true);
       
-      // Call our API to create the wallet
-      const response = await fetch('/api/wallet', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          passkeyCredential: mockPasskey
-        })
-      });
+      // Simulated API call to check if wallet exists
+      // In a real app, this would be an API call to the backend
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      if (!response.ok) {
-        throw new Error(`Failed to create wallet: ${response.status}`);
-      }
+      // For demo purposes, we'll assume no wallet exists initially
+      setHasWallet(false);
+      setWallet(null);
       
-      const data = await response.json();
-      
-      if (!data.success) {
-        throw new Error(data.error || 'Unknown error creating wallet');
-      }
-      
-      // Get the wallet data from the response
-      const newWallet = {
-        smartWalletAddress: data.data.smartWalletAddress
-      };
-      
-      console.log('Wallet created successfully:', newWallet);
-      
-      localStorage.setItem('viavo_wallet', JSON.stringify(newWallet));
-      setWallet(newWallet);
-      setHasWallet(true);
-      setWalletBalance('0.05');
-      navigateTo('biometricsConfirmation');
-    } catch (err) {
-      console.error('Error creating wallet:', err);
+      // If we found a wallet, navigate to main app
+      // if (wallet) {
+      //   setHasWallet(true);
+      //   navigateTo('mainApp');
+      // }
+    } catch (error) {
+      console.error('Error checking wallet:', error);
     } finally {
       setIsWalletLoading(false);
     }
-  }, [navigateTo]);
-
-  // Combine all values
+  }, []);
+  
+  const createWallet = useCallback(async () => {
+    try {
+      setIsWalletLoading(true);
+      
+      // Simulated API call to create wallet
+      // In a real app, this would use WebAuthn and call the backend
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Create a mock wallet for demo purposes
+      const mockWallet = {
+        smartWalletAddress: '0x1234567890abcdef1234567890abcdef12345678'
+      };
+      
+      setWallet(mockWallet);
+      setHasWallet(true);
+      setWalletBalance('0.05');
+      
+      return mockWallet;
+    } catch (error) {
+      console.error('Error creating wallet:', error);
+      throw error;
+    } finally {
+      setIsWalletLoading(false);
+    }
+  }, []);
+  
+  // Assemble the context value
   const value: AppContextInterface = {
     screen,
     modal,
     navigateTo,
     showModal,
     hideModal,
+    
     hasWallet,
     walletBalance,
     isWalletLoading,
     wallet,
+    
     checkIfWalletExists,
-    createWallet
+    createWallet,
   };
-
-  return (
-    <AppContext.Provider value={value}>
-      {children}
-    </AppContext.Provider>
-  );
+  
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
 
-// Hook to use this context
+// Custom hook for using the context
 export function useAppContext() {
   const context = useContext(AppContext);
-  
   if (context === undefined) {
     throw new Error('useAppContext must be used within an AppProvider');
   }
-  
   return context;
 }
