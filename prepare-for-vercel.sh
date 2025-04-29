@@ -45,6 +45,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
+  root: 'client',              // Tell Vite where to find index.html
   plugins: [react()],
   resolve: {
     alias: {
@@ -54,7 +55,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: 'dist',
+    outDir: '../dist',         // Output to root-level for Vercel
     emptyOutDir: true,
   },
 });
