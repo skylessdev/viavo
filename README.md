@@ -13,10 +13,10 @@ Viavo is a progressive web app (PWA) for cryptocurrency management that enables 
 ## Technology Stack
 
 - **Frontend**: React, TypeScript, Shadcn UI components
-- **Backend**: Express.js, Node.js
+- **Backend**: Vercel Serverless Functions
 - **Authentication**: WebAuthn (Passkeys)
 - **Blockchain**: StackUp API for ERC-4337 smart contract wallet deployment
-- **Data Storage**: In-memory storage (development) / PostgreSQL (production)
+- **Data Storage**: In-memory storage (development) / External storage services (production)
 
 ## Deploying to Vercel
 
@@ -35,18 +35,34 @@ Viavo is a progressive web app (PWA) for cryptocurrency management that enables 
    cd viavo
    ```
 
-2. **Set up Environment Variables**
+2. **Prepare for Serverless Deployment**
 
-   Create a `.env` file based on the `.env.example` file:
+   Run the included helper script to prepare the project for serverless deployment:
+
+   ```bash
+   # Make the script executable
+   chmod +x prepare-for-vercel.sh
+
+   # Run the script
+   ./prepare-for-vercel.sh
+   ```
+
+   This script will:
+   - Back up your current configuration files
+   - Apply a simplified `vercel.json` optimized for serverless deployment
+   - Build the frontend for testing
+   - Provide next steps for deployment
+
+3. **Set up Environment Variables**
+
+   You'll need to set these environment variables in your Vercel project settings:
 
    ```
    STACKUP_API_KEY=your_stackup_api_key_here
    BASE_SEPOLIA_RPC_URL=https://sepolia.base.org
    ```
 
-   You'll need to add these same environment variables in the Vercel project settings.
-
-3. **Deploy to Vercel**
+4. **Deploy to Vercel**
 
    There are two ways to deploy to Vercel:
 
@@ -71,6 +87,8 @@ Viavo is a progressive web app (PWA) for cryptocurrency management that enables 
      - Install command: `npm install`
    - Add environment variables in the Vercel project settings
    - Deploy!
+
+For detailed deployment instructions, see [SERVERLESS-DEPLOYMENT-GUIDE.md](./docs/SERVERLESS-DEPLOYMENT-GUIDE.md)
 
 ### Verifying Deployment
 
