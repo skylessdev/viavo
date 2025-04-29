@@ -1,8 +1,8 @@
 {
   "version": 2,
   "framework": "vite",
-  "buildCommand": "./build.sh",
-  "outputDirectory": "dist/public",
+  "buildCommand": "vite build",
+  "outputDirectory": "dist",
   "env": {
     "NODE_ENV": "production"
   },

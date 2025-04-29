@@ -1,8 +1,9 @@
+// Development server for Replit environment only
+// Not used in production - Vercel uses serverless functions in /api directory
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
-import { execSync } from 'child_process';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
