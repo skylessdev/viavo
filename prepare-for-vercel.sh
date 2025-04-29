@@ -31,6 +31,7 @@ cat > vercel.json << 'EOF'
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "rootDirectory": "client",
   "env": {
     "NODE_ENV": "production"
   }
