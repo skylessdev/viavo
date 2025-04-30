@@ -110,11 +110,11 @@ cd client && npm install && cd ..
 # Step 8: Update PostCSS configuration
 echo "Updating PostCSS configuration..."
 cat > client/postcss.config.js << 'EOF'
-import tailwindcssPostcss from '@tailwindcss/postcss';
+import tailwindcss from '@tailwindcss/postcss';
 import autoprefixer from 'autoprefixer';
 
 export default {
-  plugins: [tailwindcssPostcss(), autoprefixer()],
+  plugins: [tailwindcss(), autoprefixer()],
 };
 EOF
 
