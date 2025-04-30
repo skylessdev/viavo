@@ -1,36 +1,17 @@
 # Viavo Serverless Deployment Guide
 
-This document provides a comprehensive guide for deploying the Viavo application using a serverless architecture on Vercel.
+This guide explains how to deploy the Viavo project to Vercel as a serverless application.
 
-## Architecture Overview
+## Project Structure
 
-Viavo follows a pure serverless approach:
+The Viavo project uses a specific structure:
+- Frontend code is in the `client/` directory (including index.html)
+- API endpoints are in the `api/` directory
+- Shared types and schemas are in the `shared/` directory
 
-- Frontend: React application built with Vite
-- Backend: Vercel serverless functions in the `/api` directory
-- Database: External database services (configured through environment variables)
+## Deployment Configuration
 
-## File Structure
-
-```
-viavo/
-├── api/                  # Serverless API functions for Vercel
-│   ├── wallet.js         # Wallet management endpoints
-│   ├── wallet-balance.js # Wallet balance endpoint
-│   ├── payment-link.js   # Payment link generation
-│   ├── payment.js        # Payment processing
-│   ├── transactions.js   # Transaction history
-│   └── shared/           # Shared utilities for API functions
-├── client/               # Frontend React application
-│   ├── src/              # React source code
-│   └── index.html        # HTML entry point
-├── shared/               # Shared code between frontend and API
-├── docs/                 # Documentation
-├── vercel.json           # Vercel deployment configuration
-└── package.json          # Project dependencies and scripts
-```
-
-## Key Configuration Files
+The deployment to Vercel relies on two key configuration files:
 
 ### 1. vercel.json
 
@@ -46,23 +27,7 @@ viavo/
 }
 ```
 
-### 2. package.json (Simplified for Serverless)
-
-```json
-{
-  "name": "viavo",
-  "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  // dependencies...
-}
-```
-
-### 3. vite.config.ts (Simplified for Serverless)
+### 2. vite.config.ts
 
 ```typescript
 import { defineConfig } from 'vite';
@@ -70,6 +35,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
+  root: 'client',              // Tell Vite where to find index.html
   plugins: [react()],
   resolve: {
     alias: {
@@ -79,116 +45,63 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: 'dist',
+    outDir: '../dist',         // Output to root-level for Vercel
     emptyOutDir: true,
   },
 });
 ```
 
-## Required Environment Variables
+## Important Notes
 
-The following environment variables must be set in Vercel:
+1. **Client Directory**: The frontend code is in the `client/` directory, so Vite needs to be configured with `root: 'client'` to find index.html.
 
-- `STACKUP_API_KEY`: API key for StackUp bundler
-- `BASE_SEPOLIA_RPC_URL`: Base Sepolia RPC URL (for testnet)
+2. **Build Output**: The build output is configured to go to the root-level `dist/` directory with `outDir: '../dist'` in vite.config.ts.
+
+3. **API Routes**: The API endpoints in the `api/` directory will be automatically deployed as serverless functions by Vercel.
 
 ## Deployment Steps
 
-### Initial Setup
+1. **Prepare Project**: 
+   ```bash
+   ./prepare-for-vercel.sh
+   ```
+   This script sets up the correct configuration for Vercel deployment.
 
-1. Create a new project on Vercel
-2. Connect your GitHub repository
-3. Set the required environment variables
+2. **Push to GitHub**:
+   ```bash
+   git add .
+   git commit -m "Prepare for serverless deployment"
+   git push origin main
+   ```
 
-### Preparing the Repository for Deployment
+3. **Import to Vercel**:
+   - Go to https://vercel.com/new
+   - Import your GitHub repository
+   - Configure the following environment variables:
+     - `STACKUP_API_KEY`: Your StackUp API key
+     - `BASE_SEPOLIA_RPC_URL`: The Sepolia RPC URL
 
-To simplify the deployment preparation, you can use the included helper script:
-
-```bash
-# Make the script executable
-chmod +x prepare-for-vercel.sh
-
-# Run the script
-./prepare-for-vercel.sh
-```
-
-This script will:
-1. Back up your current configuration files
-2. Apply a simplified `vercel.json` optimized for serverless deployment
-3. Build the frontend for testing
-4. Provide next steps for deployment
-
-Alternatively, you can manually prepare the repository:
-
-1. Ensure your project follows the file structure outlined above
-2. Remove any server/ directory: `rm -rf server/`
-3. Update vercel.json to use the simplified configuration
-4. Push changes to your GitHub repository
-
-### Vercel Deployment
-
-1. Navigate to your project on the Vercel dashboard
-2. Trigger a manual deployment (or let it automatically deploy from GitHub)
-3. Verify that the build completes successfully
-4. Check the deployment logs for any errors
-
-## Local Development
-
-For local development, you can use the Vite development server:
-
-```bash
-npm run dev
-```
-
-Since Vercel functions can't be run locally in the same way, you may need to:
-
-1. Use mock data for API responses during development
-2. Create local development proxies for API testing
-3. Use services like Vercel CLI for local function testing
+4. **Deploy**:
+   - Click "Deploy"
+   - Wait for the build and deployment to complete
 
 ## Troubleshooting
 
-### Build Failures
+### "Could not resolve entry module 'index.html'" Error
 
-If your build fails on Vercel:
+This error occurs when Vite cannot find the index.html file. Make sure:
+- Your vite.config.ts has `root: 'client'` to tell Vite where to find index.html
+- Your build output is set to `outDir: '../dist'` to ensure files go to the correct directory
 
-1. Check the build logs for specific errors
-2. Verify that all dependencies are correctly listed in package.json
-3. Ensure your build command is correctly specified in vercel.json
+### API Routes Not Working
 
-### API Function Issues
+Make sure:
+- Your API routes are in the `api/` directory at the root level
+- Each API file has a proper default export function
 
-If API functions are not working:
+### Other Deployment Issues
 
-1. Check the function logs in the Vercel dashboard
-2. Verify that all required environment variables are set
-3. Check for any CORS configuration issues
-
-### Frontend Issues
-
-If the frontend is not working properly:
-
-1. Check for JavaScript errors in the browser console
-2. Verify that the build output is being correctly served from the specified output directory
-3. Ensure that all API endpoints are being called with the correct paths
-
-## Maintenance and Updates
-
-### Updating the Application
-
-1. Make changes to your codebase locally
-2. Test thoroughly
-3. Push changes to your GitHub repository
-4. Vercel will automatically deploy the updates
-
-### Monitoring
-
-Vercel provides built-in monitoring and analytics:
-
-1. Function invocations and performance metrics
-2. Error tracking
-3. Deployment history
-
-## Conclusion
-
-By following this serverless approach, Viavo can be deployed and scaled efficiently on Vercel without the need for managing servers or complex infrastructure. The serverless architecture provides excellent scalability, reliability, and reduced operational overhead.
+If you encounter other deployment issues:
+1. Check the Vercel deployment logs for specific errors
+2. Verify that all environment variables are correctly set
+3. Ensure that package.json has the correct build script: `"build": "vite build"`
