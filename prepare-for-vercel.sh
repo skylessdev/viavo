@@ -99,9 +99,19 @@ cat > client/package.json << 'EOF'
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   }
 }
 EOF
+
+# Install dependencies in client directory
+echo "Installing dependencies in client directory..."
+cd client && npm install && cd ..
 
 # Step 8: Build frontend for testing
 echo "Building frontend for testing..."

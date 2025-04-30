@@ -109,10 +109,23 @@ This error occurs when Vercel can't find the build script. Make sure:
   {
     "scripts": {
       "build": "vite build"
+    },
+    "devDependencies": {
+      "vite": "^5.0.0",
+      "@vitejs/plugin-react": "^4.0.0",
+      "react": "^18.2.0",
+      "react-dom": "^18.2.0"
     }
   }
   ```
+- The dependencies are installed in the client directory
 - You don't have conflicting Vercel configuration settings
+
+### "vite: command not found" Error
+
+This error occurs when the vite dependency is missing. Make sure:
+- vite is included in the devDependencies section of client/package.json
+- Run `cd client && npm install` before deployment to install the required packages
 
 ### Other Deployment Issues
 
