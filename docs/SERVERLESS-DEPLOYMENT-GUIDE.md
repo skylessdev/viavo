@@ -121,6 +121,29 @@ This error occurs when Vercel can't find the build script. Make sure:
 - The dependencies are installed in the client directory
 - You don't have conflicting Vercel configuration settings
 
+### Root package.json Conflicts
+
+If you have a build script in your root package.json, it might conflict with Vercel deployment even when you set Root Directory to `client`. To fix this:
+
+1. Rename or remove the root package.json before deployment:
+   ```bash
+   # Backup and rename root package.json
+   cp package.json package.json.backup
+   mv package.json package.json.original
+   ```
+
+2. Or remove the build script from the root package.json:
+   ```json
+   {
+     "scripts": {
+       "dev": "node vite-with-api.js",
+       // Remove the "build" script or rename it to something else
+     }
+   }
+   ```
+
+The prepare-for-vercel.sh script handles this by renaming the root package.json during preparation.
+
 ### "vite: command not found" Error
 
 This error occurs when the vite dependency is missing. Make sure:

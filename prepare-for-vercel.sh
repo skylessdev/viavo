@@ -28,12 +28,7 @@ echo "Applying simplified vercel.json..."
 cat > vercel.json << 'EOF'
 {
   "version": 2,
-  "framework": "vite",
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "env": {
-    "NODE_ENV": "production"
-  }
+  "framework": "vite"
 }
 EOF
 
@@ -61,20 +56,14 @@ export default defineConfig({
 });
 EOF
 
-# Step 5: Update package.json for serverless
-echo "Updating package.json scripts for serverless deployment..."
-# We'll create a temporary file with jq if available, otherwise use a simple cat approach
-if command -v jq >/dev/null 2>&1; then
-  echo "Using jq to update package.json..."
-  jq '.scripts = {"dev": "node vite-with-api.js", "dev:vite": "vite", "build": "vite build", "preview": "vite preview"}' package.json > package.json.tmp
-  mv package.json.tmp package.json
-else
-  echo "jq not found, using template file..."
-  cp docs/clean-package-with-scripts.json.txt package.json.tmp
-  # Preserve the existing dependencies section
-  # This is a simplified approach and might need manual review
-  echo "NOTE: Dependencies section might need manual adjustment"
-fi
+# Step 5: Update or rename package.json for serverless
+echo "Backing up and renaming root package.json for Vercel deployment..."
+# Backup first
+cp package.json .backup/package.json.bak
+
+# Instead of modifying, rename to prevent conflicts with client/package.json
+# This is important when Root Directory is set to 'client' in Vercel
+mv package.json package.json.original
 
 # Step 6: Update workflow configuration
 echo "Updating workflow configuration..."
@@ -115,9 +104,18 @@ cd client && npm install && cd ..
 
 # Step 8: Build frontend for testing
 echo "Building frontend for testing..."
-npm run build
+cd client && npm run build && cd ..
 
-# Step 9: Print next steps
+# Step 9: Restore package.json for local development
+echo "Restoring original package.json for local development..."
+if [ -f "package.json.original" ]; then
+  mv package.json.original package.json
+  echo "Original package.json restored."
+else
+  echo "Warning: Could not find package.json.original to restore."
+fi
+
+# Step 10: Print next steps
 echo ""
 echo "==========================================================="
 echo "🚀 Preparation Complete!"
