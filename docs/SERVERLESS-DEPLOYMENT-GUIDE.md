@@ -77,6 +77,7 @@ export default defineConfig({
 3. **Import to Vercel**:
    - Go to https://vercel.com/new
    - Import your GitHub repository
+   - **Important**: In Project Settings → General → Root Directory, set it to `client`
    - Configure the following environment variables:
      - `STACKUP_API_KEY`: Your StackUp API key
      - `BASE_SEPOLIA_RPC_URL`: The Sepolia RPC URL
@@ -98,6 +99,20 @@ This error occurs when Vite cannot find the index.html file. Make sure:
 Make sure:
 - Your API routes are in the `api/` directory at the root level
 - Each API file has a proper default export function
+
+### "npm run build" Error (Exit Code 127)
+
+This error occurs when Vercel can't find the build script. Make sure:
+- You've set the Root Directory to `client` in Vercel Project Settings
+- The client/package.json file exists and contains:
+  ```json
+  {
+    "scripts": {
+      "build": "vite build"
+    }
+  }
+  ```
+- You don't have conflicting Vercel configuration settings
 
 ### Other Deployment Issues
 

@@ -87,11 +87,27 @@ if [ -f ".replit" ]; then
   sed -i 's/NODE_ENV=development tsx server\/index.ts/node vite-with-api.js/g' .replit || echo "Failed to update workflow command, please update manually"
 fi
 
-# Step 7: Build frontend for testing
+# Step 7: Create client/package.json
+echo "Creating client/package.json for Vercel deployment..."
+cat > client/package.json << 'EOF'
+{
+  "name": "viavo-client",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  }
+}
+EOF
+
+# Step 8: Build frontend for testing
 echo "Building frontend for testing..."
 npm run build
 
-# Step 8: Print next steps
+# Step 9: Print next steps
 echo ""
 echo "==========================================================="
 echo "🚀 Preparation Complete!"
@@ -106,11 +122,13 @@ echo "   git push origin main"
 echo ""
 echo "2. Import the repository in Vercel"
 echo ""
-echo "3. Configure the following environment variables in Vercel:"
+echo "3. In Project Settings → General → Root Directory, set it to 'client'"
+echo ""
+echo "4. Configure the following environment variables in Vercel:"
 echo "   - STACKUP_API_KEY"
 echo "   - BASE_SEPOLIA_RPC_URL"
 echo ""
-echo "4. Deploy the project"
+echo "5. Deploy the project"
 echo ""
 echo "Note: For detailed deployment instructions, refer to:"
 echo "docs/SERVERLESS-DEPLOYMENT-GUIDE.md"
