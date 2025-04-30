@@ -28,7 +28,8 @@ echo "Applying simplified vercel.json..."
 cat > vercel.json << 'EOF'
 {
   "version": 2,
-  "framework": "vite"
+  "framework": "vite",
+  "rootDirectory": "client"
 }
 EOF
 
@@ -93,7 +94,11 @@ cat > client/package.json << 'EOF'
     "vite": "^5.0.0",
     "@vitejs/plugin-react": "^4.0.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "@tailwindcss/postcss": "^3.0.0",
+    "tailwindcss": "^3.4.0",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0"
   }
 }
 EOF
@@ -102,7 +107,18 @@ EOF
 echo "Installing dependencies in client directory..."
 cd client && npm install && cd ..
 
-# Step 8: Build frontend for testing
+# Step 8: Update PostCSS configuration
+echo "Updating PostCSS configuration..."
+cat > client/postcss.config.js << 'EOF'
+import tailwindcssPostcss from '@tailwindcss/postcss';
+import autoprefixer from 'autoprefixer';
+
+export default {
+  plugins: [tailwindcssPostcss(), autoprefixer()],
+};
+EOF
+
+# Step 9: Build frontend for testing
 echo "Building frontend for testing..."
 cd client && npm run build && cd ..
 

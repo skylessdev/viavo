@@ -1,11 +1,12 @@
 // Simple Vite development server with API support
 // This script is a lightweight replacement for the Express server
 // that proxies API requests to the Vercel serverless functions
-const { createServer } = require('vite');
-const express = require('express');
-const path = require('path');
+import { createServer } from 'vite';
+import express from 'express';
+import { fileURLToPath } from 'url';
+import path from 'path';
 
-// In CommonJS, __dirname is already available
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const port = process.env.PORT || 5001;
 
 // Check for StackUp API key
@@ -24,23 +25,10 @@ async function startServer() {
   // Configure API routes
   console.log('Setting up API routes...');
   
-  // Dynamic require for API handlers
-  function requireHandler(path) {
-    try {
-      return require(path).default;
-    } catch (error) {
-      console.error(`Error loading handler from ${path}:`, error);
-      return (req, res) => res.status(500).json({ 
-        success: false, 
-        error: 'Failed to load API handler'
-      });
-    }
-  }
-  
   // Wallet API
-  app.use('/api/wallet', (req, res) => {
+  app.use('/api/wallet', async (req, res) => {
     try {
-      const handler = requireHandler('./api/wallet.js');
+      const { default: handler } = await import('./api/wallet.js');
       return handler(req, res);
     } catch (error) {
       console.error('Error in wallet endpoint:', error);
@@ -49,9 +37,9 @@ async function startServer() {
   });
   
   // Wallet balance API
-  app.use('/api/wallet-balance', (req, res) => {
+  app.use('/api/wallet-balance', async (req, res) => {
     try {
-      const handler = requireHandler('./api/wallet-balance.js');
+      const { default: handler } = await import('./api/wallet-balance.js');
       return handler(req, res);
     } catch (error) {
       console.error('Error in wallet-balance endpoint:', error);
@@ -60,9 +48,9 @@ async function startServer() {
   });
   
   // Payment link API
-  app.use('/api/payment-link', (req, res) => {
+  app.use('/api/payment-link', async (req, res) => {
     try {
-      const handler = requireHandler('./api/payment-link.js');
+      const { default: handler } = await import('./api/payment-link.js');
       return handler(req, res);
     } catch (error) {
       console.error('Error in payment-link endpoint:', error);
@@ -71,9 +59,9 @@ async function startServer() {
   });
   
   // Payment API
-  app.use('/api/payment', (req, res) => {
+  app.use('/api/payment', async (req, res) => {
     try {
-      const handler = requireHandler('./api/payment.js');
+      const { default: handler } = await import('./api/payment.js');
       return handler(req, res);
     } catch (error) {
       console.error('Error in payment endpoint:', error);
@@ -82,9 +70,9 @@ async function startServer() {
   });
   
   // Transactions API
-  app.use('/api/transactions', (req, res) => {
+  app.use('/api/transactions', async (req, res) => {
     try {
-      const handler = requireHandler('./api/transactions.js');
+      const { default: handler } = await import('./api/transactions.js');
       return handler(req, res);
     } catch (error) {
       console.error('Error in transactions endpoint:', error);
